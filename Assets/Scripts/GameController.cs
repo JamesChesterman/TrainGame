@@ -9,21 +9,21 @@ public class GameController : MonoBehaviour
     public GameObject levelBlock;
     public Transform startPoint;
     private Transform currentPoint;
-    public Vector3 differencePerColumn;
-    public Vector3 differencePerRow;
+    public Vector3 differencePerColumn = new Vector3(3.2f, 0f, 0f);
+    public Vector3 differencePerRow = new Vector3(0f, 0f, 3.2f);
+    
+    private int[,] tracks;
 
-    // Start is called before the first frame update
-    void Start()
-    {   
+    private void initialiseArrays(){
         GameObject[,] levelBlockArray = new GameObject[levelHeight, levelWidth];
-        int[,] tracks = new int[levelHeight, levelWidth];
+        tracks = new int[levelHeight, levelWidth];
 
         currentPoint = startPoint;
         for(int i=0; i<levelHeight; i++){
             for(int j=0;j<levelWidth; j++){
 
                 GameObject newBlock = Instantiate(levelBlock, currentPoint.position, currentPoint.rotation);
-                newBlock.GetComponent<LevelBlock>().setIandJ(i, j);
+                newBlock.GetComponent<LevelBlock>().setIandJ(this, i, j);
                 levelBlockArray[i,j] = newBlock;
 
                 tracks[i,j] = 0;
@@ -34,6 +34,18 @@ public class GameController : MonoBehaviour
             currentPoint.Translate(differencePerColumn * -levelWidth);
             startPoint.Translate(differencePerRow);
         }
+    }
+
+    public void setTrackPlaced(int i, int j){
+        tracks[i,j] = 1;
+        //Print the array?
+        Debug.Log((string.Join(", ", tracks)));
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {   
+        initialiseArrays();
     }
 
     // Update is called once per frame

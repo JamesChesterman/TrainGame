@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelBlock : MonoBehaviour
-{
+{   
+    public GameController gameController;
     public GameObject track;
     public Transform trackPos;
     private bool hasTrack;
@@ -15,11 +16,13 @@ public class LevelBlock : MonoBehaviour
         if(hasTrack == false){
             GameObject newTrack = Instantiate(track, trackPos.position, trackPos.rotation) as GameObject;
             hasTrack = true;
+            gameController.setTrackPlaced(iInLevelArray, jInLevelArray);
         }   
     }
 
     //Keeps track of where this object is in the array of level blocks
-    public void setIandJ(int i, int j){
+    public void setIandJ(GameController gameControllerPassed, int i, int j){
+        gameController = gameControllerPassed;
         iInLevelArray = i;
         jInLevelArray = j;
     }
