@@ -9,6 +9,7 @@ public class CursorController : MonoBehaviour
     public Texture2D cursorClicked;
 
     private CursorControls controls;
+    private Camera mainCamera;
 
     //Changes the cursor image depending on whether you have clicked or not
     private void changeCursor(Texture2D cursorType){
@@ -27,16 +28,30 @@ public class CursorController : MonoBehaviour
         controls = new CursorControls();
         changeCursor(cursor);
         Cursor.lockState = CursorLockMode.Confined;
+        mainCamera = Camera.main;
     }
 
     private void startedClick(){
-        Debug.Log("HERE");
         changeCursor(cursorClicked);
     }
 
     private void endedClick(){
-        Debug.Log("HERE");
         changeCursor(cursor);
+        detectObj();
+    }
+
+    private void detectObj(){
+        //Use raycast to see if we're clicking anything in the scene
+        Ray ray = mainCamera.ScreenPointToRay(controls.Mouse.Position.ReadValue<Vector2>());
+        RaycastHit hit;
+        //This might need to be improved at a later date. Come here if the clicking isn't really working properly. (Involves LayerMasks)
+        if(Physics.Raycast(ray, out hit)){
+            if(hit.collider != null){
+                if(hit.collider.tag == "LevelBlock"){
+                    hit.collider.gameObject.GetComponent<LevelBlock>().placeTrack();
+                }
+            }
+        } 
     }
     
     // Start is called before the first frame update
