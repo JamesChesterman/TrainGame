@@ -10,7 +10,7 @@ public class GameController : MonoBehaviour
     public Transform startPoint;
     private Transform currentPoint;
     public Vector3 differencePerColumn = new Vector3(3.2f, 0f, 0f);
-    public Vector3 differencePerRow = new Vector3(0f, 0f, 3.2f);
+    public Vector3 differencePerRow = new Vector3(0f, 0f, -3.2f);
     
     private int[,] tracks;
 
@@ -38,8 +38,19 @@ public class GameController : MonoBehaviour
 
     public void setTrackPlaced(int i, int j){
         tracks[i,j] = 1;
-        //Print the array?
-        Debug.Log((string.Join(", ", tracks)));
+        //Print the array
+        printArray(tracks);
+    }
+
+    public void printArray(int[,] array2D){
+        string arrayToPrint = "";
+        for(int i=0; i<array2D.GetLength(0); i++){
+            for(int j=0; j<array2D.GetLength(1); j++){
+                arrayToPrint += array2D[i,j].ToString();
+            }
+            arrayToPrint += "\n";
+        }
+        Debug.Log(arrayToPrint);
     }
 
     // Start is called before the first frame update
