@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour
     //Each subarraylist (route) will consist of arrays of length 2 (coordinates)
     private List<List<int[]>> routeList2D = new List<List<int[]>>();
 
+    //Initialise the arrays used to store: where the tracks are placed, where the level blocks are placed
     private void initialiseArrays(){
         GameObject[,] levelBlockArray = new GameObject[levelHeight, levelWidth];
         tracks = new int[levelHeight, levelWidth];
@@ -41,9 +42,38 @@ public class GameController : MonoBehaviour
     }
 
     //The new track has been placed between two separate routes. So need to join them together
-    //private void mergeTwoRoutes(int route1, int route2){
-
-    //}
+    //Unless they're part of the same route already. In which case you need to make the new track part of a new route
+    private void mergeTwoRoutes(int route1, int route2, int newTrackX, int newTrackY){
+        if(route1 == route2){
+            //Already part of same route. Add new track to new route
+            //And delete new track from the route
+            for(int i=0; i<routeList2D[route1].Count; i++){
+                if(routeList2D[route1][i][0] == newTrackX && routeList2D[route1][i][1] == newTrackY){
+                    Debug.Log("HERE");
+                    routeList2D[route1].RemoveAt(i);
+                }
+            }
+            //Make new route
+            routeList2D.Add(new List<int[]> ());
+            routeList2D[routeList2D.Count-1].Add(new int[] {newTrackX, newTrackY});
+        }else{
+            //Need to see which array has newTrack at the end and which has it at the start
+            if(routeList2D[route2][0][0] == newTrackX && routeList2D[route2][0][1] == newTrackY){
+                //So you need to add route2 to route1 (route1 has newTrack at last index)
+                List<int[]> route2Array = routeList2D[route2];
+                for(int i=1; i<route2Array.Count; i++){
+                    //Skip the first one as this has newTrack there
+                    routeList2D[route1].Add(route2Array[i]);
+                }
+            }else{
+                //So you need to add route1 to route2 (route2 has newTrack at last index)
+                List<int[]> route1Array = routeList2D[route1];
+                for(int i=1; i<route1Array.Count; i++){
+                    routeList2D[route2].Add(route1Array[i]);
+                }
+            }
+        }
+    }
 
     //In checkIfNewRoute, you look up, down, left and right
     //If there's a track there, you pass it to this function
@@ -104,9 +134,10 @@ public class GameController : MonoBehaviour
                 continue;
             }
             if(routesTrackAddedTo[x] != -1 && routeFound != -1){
-                //Already found a route. So need to join these 2 routes together
+                //Already found a route. So need to join these 2 routes together BUT
                 //If the two tracks are part of the same route, then you need to make this new track as part of a separate route
                 //Otherwise you can place tracks in a circle
+                mergeTwoRoutes(routeFound, routesTrackAddedTo[x], i, j);
                 break;
             }
         }
