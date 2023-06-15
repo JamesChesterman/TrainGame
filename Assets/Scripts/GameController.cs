@@ -40,42 +40,81 @@ public class GameController : MonoBehaviour
         }
     }
 
-    //private void checkIfTrackStartOrEndOfRoute(){
+    //The new track has been placed between two separate routes. So need to join them together
+    //private void mergeTwoRoutes(int route1, int route2){
 
     //}
 
-    private void checkIfNewRoute(int i, int j){
-        //If it's next to a track (not including diagonals) AND this track is the end of a route 
-        //Then the newly placed track becomes part of the same route
-        //Look up
-        //Need to check that i isn't zero
-        if(tracks[i-1, j] == 1){
-            for(int p=0; p<routeList2D.Count; p++){
-                //Check each route to see if these coordinates are at the start or end of each route
-                int[] startOfRoute = routeList2D[p][0];
-                int[] endOfRoute = routeList2D[p][routeList2D[p].Count-1];
-                if(startOfRoute[0] == (i-1) && startOfRoute[1] == j){
-                    //Add new track to start of route
-                    routeList2D[p].Insert(0, new int[] {i,j});
-                    //Need to check that there aren't any other tracks that the track is also connected to
-                    //So if the new track is between two pieces of track, it needs to join the 2 together
-
-                    return;
-                }else if(endOfRoute[0] == (i-1) && endOfRoute[1] == j){
-                    //Add new track to end of route
-                    routeList2D[p].Add(new int[] {i, j});
-                    //Need to check that there aren't any other tracks that the track is also connected to
-                    //So if the new track is between two pieces of track, it needs to join the 2 together
-
-                    return;
-                }
+    //In checkIfNewRoute, you look up, down, left and right
+    //If there's a track there, you pass it to this function
+    //This function then determines if this piece of track is at the start or the end of the route
+    //If so, then you need to add the new track to the start / end of the route
+    private int checkIfTrackStartOrEndOfRoute(int trackX, int trackY, int newTrackX, int newTrackY, string direction){
+        for(int p=0; p<routeList2D.Count; p++){
+            //Check each route to see if these coordinates are at the start or end of each route
+            int[] startOfRoute = routeList2D[p][0];
+            int[] endOfRoute = routeList2D[p][routeList2D[p].Count-1];
+            if(startOfRoute[0] == trackX && startOfRoute[1] == trackY){
+                //Add new track to start of route
+                routeList2D[p].Insert(0, new int[] {newTrackX, newTrackY});
+                return p;
+            }else if(endOfRoute[0] == trackX && endOfRoute[1] == trackY){
+                //Add new track to end of route
+                routeList2D[p].Add(new int[] {newTrackX, newTrackY});
+                return p;
             }
         }
+        return -1;
+    }
 
-        //Checked all directions, there's nothing surrounding the new track that is a start / end point of a route
-        //Make new route
-        routeList2D.Add(new List<int[]> ());
-        routeList2D[routeList2D.Count-1].Add(new int[] {i,j});
+    //If it's next to a track (not including diagonals) AND this track is the end of a route 
+    //Then the newly placed track becomes part of the same route
+    private void checkIfNewRoute(int i, int j){
+        List<int> routesTrackAddedTo = new List<int>();
+        //Look up
+        //Need to check that i isn't zero
+        if(i != 0){
+            if(tracks[i-1,j] == 1){
+                routesTrackAddedTo.Add(checkIfTrackStartOrEndOfRoute(i-1, j, i, j, "up"));
+            }
+        }
+        //Look down
+        if(i != tracks.Length-1){
+            if(tracks[i+1,j] == 1){
+                routesTrackAddedTo.Add(checkIfTrackStartOrEndOfRoute(i+1, j, i, j, "down"));
+            }
+        }
+        //Look left
+        if(j != 0){
+            if(tracks[i,j-1] == 1){
+                routesTrackAddedTo.Add(checkIfTrackStartOrEndOfRoute(i, j-1, i, j, "left"));
+            }
+        }
+        //Look right
+        if(j != tracks.GetLength(1)-1){
+            if(tracks[i,j+1] == 1){
+                routesTrackAddedTo.Add(checkIfTrackStartOrEndOfRoute(i, j+1, i, j, "right"));
+            }
+        }
+        
+        int routeFound = -1;
+        for(int x=0;x<routesTrackAddedTo.Count;x++){
+            if(routesTrackAddedTo[x] != -1 && routeFound == -1){
+                routeFound = routesTrackAddedTo[x];
+                continue;
+            }
+            if(routesTrackAddedTo[x] != -1 && routeFound != -1){
+                //Already found a route. So need to join these 2 routes together
+                //If the two tracks are part of the same route, then you need to make this new track as part of a separate route
+                //Otherwise you can place tracks in a circle
+                break;
+            }
+        }
+        if(routeFound == -1){
+            //Make new route
+            routeList2D.Add(new List<int[]> ());
+            routeList2D[routeList2D.Count-1].Add(new int[] {i,j});
+        }
     }
 
     public void setTrackPlaced(int i, int j){
@@ -83,6 +122,8 @@ public class GameController : MonoBehaviour
         //Print the array
         printArray(tracks);
         checkIfNewRoute(i,j);
+
+        //Print the array of routes
         string dynamicArrayAsString = string.Join(", ",
             routeList2D.Select(subarray =>
                 $"[{string.Join(", ", subarray.Select(arr => $"[{string.Join(", ", arr)}]"))}]"
