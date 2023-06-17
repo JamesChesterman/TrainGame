@@ -41,6 +41,15 @@ public class GameController : MonoBehaviour
         }
     }
 
+    //Merges two lists. Because the new track is at the end of list1 and at the start of list 2 you can skip over it
+    private void mergeTwoLists(int routeToAddTo, int routeToRemove){
+        List<int[]> routeToRemoveArray = routeList2D[routeToRemove];
+        for(int i=1; i<routeToRemoveArray.Count; i++){
+            routeList2D[routeToAddTo].Add(routeToRemoveArray[i]);
+        }
+        routeList2D.RemoveAt(routeToRemove);
+    }
+
     //The new track has been placed between two separate routes. So need to join them together
     //Unless they're part of the same route already. In which case you need to make the new track part of a new route
     private void mergeTwoRoutes(int route1, int route2, int newTrackX, int newTrackY){
@@ -49,7 +58,6 @@ public class GameController : MonoBehaviour
             //And delete new track from the route
             for(int i=0; i<routeList2D[route1].Count; i++){
                 if(routeList2D[route1][i][0] == newTrackX && routeList2D[route1][i][1] == newTrackY){
-                    Debug.Log("HERE");
                     routeList2D[route1].RemoveAt(i);
                 }
             }
@@ -57,20 +65,45 @@ public class GameController : MonoBehaviour
             routeList2D.Add(new List<int[]> ());
             routeList2D[routeList2D.Count-1].Add(new int[] {newTrackX, newTrackY});
         }else{
-            //Need to see which array has newTrack at the end and which has it at the start
-            if(routeList2D[route2][0][0] == newTrackX && routeList2D[route2][0][1] == newTrackY){
-                //So you need to add route2 to route1 (route1 has newTrack at last index)
-                List<int[]> route2Array = routeList2D[route2];
-                for(int i=1; i<route2Array.Count; i++){
-                    //Skip the first one as this has newTrack there
-                    routeList2D[route1].Add(route2Array[i]);
-                }
+            //Case 1: IF tracks are like: tStart, tEnd, tNew, tStart, tEnd THEN it's firstPart, tNew, secondPart
+            //Case 2: IF tracks are like: tEnd, tStart, tNew, tEnd, tStart THEN it's secondPart, tNew, firstPart
+            //Case 3: IF tracks are like: tStart, tEnd, tNew, tEnd, tStart THEN it's firstPart, tNew, reverse(secondPart)
+            //Case 4: IF tracks are like: tEnd, tStart, tNew, tStart, tEnd THEN it's reverse(firstPart), tNew, secondPart
+            //To be able to tell: for example the first case the newTrack will be the same as the track at the end of the first list
+            //And the same as the start track in the second list
+            //I could maybe make this code more efficient but oh well.
+            int[] tStart1 = routeList2D[route1][0];
+            int[] tEnd1 = routeList2D[route1][routeList2D[route1].Count -1];
+            int[] tStart2 = routeList2D[route2][0];
+            int[] tEnd2 = routeList2D[route2][routeList2D[route2].Count -1];
+            //Case 1:
+            if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
+                mergeTwoLists(route1, route2);
+            }
+            else if((tEnd2[0] == newTrackX && tEnd2[1] == newTrackY) && (tStart1[0] == newTrackX && tStart1[1] == newTrackY)){
+                mergeTwoLists(route2, route1);
+            }
+            //Case 2:
+            else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
+                mergeTwoLists(route2, route1);
+            }
+            else if((tStart2[0] == newTrackX && tStart2[1] == newTrackY) && (tEnd1[0] == newTrackX && tEnd1[1] == newTrackY)){
+                mergeTwoLists(route1, route2);
+            }
+            //Case 3:
+            else if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
+                //Reverse the second route then append
+                routeList2D[route2].Reverse();
+                mergeTwoLists(route1, route2);
+            }
+            //Same for route2 first would just be the same block of code
+            //Case 4:
+            else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
+                routeList2D[route2].Reverse();
+                mergeTwoLists(route1, route2);
             }else{
-                //So you need to add route1 to route2 (route2 has newTrack at last index)
-                List<int[]> route1Array = routeList2D[route1];
-                for(int i=1; i<route1Array.Count; i++){
-                    routeList2D[route2].Add(route1Array[i]);
-                }
+                //This should never happen
+                mergeTwoLists(route1, route2);
             }
         }
     }
