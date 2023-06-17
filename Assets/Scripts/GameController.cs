@@ -78,20 +78,25 @@ public class GameController : MonoBehaviour
             int[] tEnd2 = routeList2D[route2][routeList2D[route2].Count -1];
             //Case 1:
             if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
+                Debug.Log("CASE 1");
                 mergeTwoLists(route1, route2);
             }
             else if((tEnd2[0] == newTrackX && tEnd2[1] == newTrackY) && (tStart1[0] == newTrackX && tStart1[1] == newTrackY)){
+                Debug.Log("CASE 1");
                 mergeTwoLists(route2, route1);
             }
             //Case 2:
             else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
+                Debug.Log("CASE 2");
                 mergeTwoLists(route2, route1);
             }
             else if((tStart2[0] == newTrackX && tStart2[1] == newTrackY) && (tEnd1[0] == newTrackX && tEnd1[1] == newTrackY)){
+                Debug.Log("CASE 2");
                 mergeTwoLists(route1, route2);
             }
             //Case 3:
             else if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
+                Debug.Log("CASE 3");
                 //Reverse the second route then append
                 routeList2D[route2].Reverse();
                 mergeTwoLists(route1, route2);
@@ -99,10 +104,12 @@ public class GameController : MonoBehaviour
             //Same for route2 first would just be the same block of code
             //Case 4:
             else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
-                routeList2D[route2].Reverse();
+                Debug.Log("CASE 4");
+                routeList2D[route1].Reverse();
                 mergeTwoLists(route1, route2);
             }else{
                 //This should never happen
+                Debug.Log("CASE NONE");
                 mergeTwoLists(route1, route2);
             }
         }
