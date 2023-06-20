@@ -63,8 +63,6 @@ public class GameController : MonoBehaviour
     //After track placed, will look through the route the track has been added to
     //Could optimise this by getting the index in the array where the track is and only looking at the adjacant tracks as well as the new one
     private void configureTrackDirections(int routeToConfigure){
-        Debug.Log("Capacity: " + routeList2D.Count);
-        Debug.Log("Index: " + routeToConfigure);
         List<int[]> routeArray = routeList2D[routeToConfigure];
         for(int i=0; i<routeArray.Count;i++){
             string prevDir = "None";
@@ -121,7 +119,6 @@ public class GameController : MonoBehaviour
         }
         configureTrackDirections(routeToAddTo);
         routeList2D.RemoveAt(routeToRemove);
-        Debug.Log("FIRST CALL");
     }
 
     //The new track has been placed between two separate routes. So need to join them together
@@ -138,7 +135,6 @@ public class GameController : MonoBehaviour
             //Make new route
             routeList2D.Add(new List<int[]> ());
             routeList2D[routeList2D.Count-1].Add(new int[] {newTrackX, newTrackY});
-            Debug.Log("SECOND CALL");
             configureTrackDirections(route1);
         }else{
             //Case 1: IF tracks are like: tStart, tEnd, tNew, tStart, tEnd THEN it's firstPart, tNew, secondPart
@@ -154,25 +150,20 @@ public class GameController : MonoBehaviour
             int[] tEnd2 = routeList2D[route2][routeList2D[route2].Count -1];
             //Case 1:
             if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
-                Debug.Log("CASE 1");
                 mergeTwoLists(route1, route2);
             }
             else if((tEnd2[0] == newTrackX && tEnd2[1] == newTrackY) && (tStart1[0] == newTrackX && tStart1[1] == newTrackY)){
-                Debug.Log("CASE 1");
                 mergeTwoLists(route2, route1);
             }
             //Case 2:
             else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
-                Debug.Log("CASE 2");
                 mergeTwoLists(route2, route1);
             }
             else if((tStart2[0] == newTrackX && tStart2[1] == newTrackY) && (tEnd1[0] == newTrackX && tEnd1[1] == newTrackY)){
-                Debug.Log("CASE 2");
                 mergeTwoLists(route1, route2);
             }
             //Case 3:
             else if((tEnd1[0] == newTrackX && tEnd1[1] == newTrackY) && (tEnd2[0] == newTrackX && tEnd2[1] == newTrackY)){
-                Debug.Log("CASE 3");
                 //Reverse the second route then append
                 routeList2D[route2].Reverse();
                 mergeTwoLists(route1, route2);
@@ -180,12 +171,10 @@ public class GameController : MonoBehaviour
             //Same for route2 first would just be the same block of code
             //Case 4:
             else if((tStart1[0] == newTrackX && tStart1[1] == newTrackY) && (tStart2[0] == newTrackX && tStart2[1] == newTrackY)){
-                Debug.Log("CASE 4");
                 routeList2D[route1].Reverse();
                 mergeTwoLists(route1, route2);
             }else{
                 //This should never happen
-                Debug.Log("CASE NONE");
                 mergeTwoLists(route1, route2);
             }
         }
@@ -247,7 +236,6 @@ public class GameController : MonoBehaviour
         for(int x=0;x<routesTrackAddedTo.Count;x++){
             if(routesTrackAddedTo[x] != -1 && routeFound == -1){
                 routeFound = routesTrackAddedTo[x];
-                Debug.Log("THIRD CALL");
                 configureTrackDirections(routesTrackAddedTo[x]);
                 continue;
             }
