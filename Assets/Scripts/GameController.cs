@@ -63,6 +63,8 @@ public class GameController : MonoBehaviour
     //After track placed, will look through the route the track has been added to
     //Could optimise this by getting the index in the array where the track is and only looking at the adjacant tracks as well as the new one
     private void configureTrackDirections(int routeToConfigure){
+        Debug.Log("Capacity: " + routeList2D.Count);
+        Debug.Log("Index: " + routeToConfigure);
         List<int[]> routeArray = routeList2D[routeToConfigure];
         for(int i=0; i<routeArray.Count;i++){
             string prevDir = "None";
@@ -106,8 +108,6 @@ public class GameController : MonoBehaviour
                 //This should never happen
                 tracksToPlace[route0,route1] = "Vertical";
             }
-            //Debug.Log(route0);
-            //Debug.Log(route1);
             levelBlockArray[route0, route1].GetComponent<LevelBlock>().redoTrack();
         }
 
@@ -119,8 +119,9 @@ public class GameController : MonoBehaviour
         for(int i=1; i<routeToRemoveArray.Count; i++){
             routeList2D[routeToAddTo].Add(routeToRemoveArray[i]);
         }
-        routeList2D.RemoveAt(routeToRemove);
         configureTrackDirections(routeToAddTo);
+        routeList2D.RemoveAt(routeToRemove);
+        Debug.Log("FIRST CALL");
     }
 
     //The new track has been placed between two separate routes. So need to join them together
@@ -137,6 +138,7 @@ public class GameController : MonoBehaviour
             //Make new route
             routeList2D.Add(new List<int[]> ());
             routeList2D[routeList2D.Count-1].Add(new int[] {newTrackX, newTrackY});
+            Debug.Log("SECOND CALL");
             configureTrackDirections(route1);
         }else{
             //Case 1: IF tracks are like: tStart, tEnd, tNew, tStart, tEnd THEN it's firstPart, tNew, secondPart
@@ -223,7 +225,7 @@ public class GameController : MonoBehaviour
             }
         }
         //Look down
-        if(i != tracks.Length-1){
+        if(i != tracks.GetLength(0)-1){
             if(tracks[i+1,j] == 1){
                 routesTrackAddedTo.Add(checkIfTrackStartOrEndOfRoute(i+1, j, i, j, "down"));
             }
@@ -245,7 +247,8 @@ public class GameController : MonoBehaviour
         for(int x=0;x<routesTrackAddedTo.Count;x++){
             if(routesTrackAddedTo[x] != -1 && routeFound == -1){
                 routeFound = routesTrackAddedTo[x];
-                configureTrackDirections(x);
+                Debug.Log("THIRD CALL");
+                configureTrackDirections(routesTrackAddedTo[x]);
                 continue;
             }
             if(routesTrackAddedTo[x] != -1 && routeFound != -1){

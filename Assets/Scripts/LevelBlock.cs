@@ -27,8 +27,6 @@ public class LevelBlock : MonoBehaviour
                     indexToUse = i;
                 }
             }
-            Debug.Log(tracksAvailable.Length);
-            Debug.Log(indexToUse);
             newTrack = Instantiate(tracksAvailable[indexToUse], trackPos.position, tracksAvailable[indexToUse].transform.rotation);
             hasTrack = true;
         }   
