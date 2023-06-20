@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: cdc96994e35079341bd6bef81fdfc35a, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cdc96994e35079341bd6bef81fdfc35a, type: 3}
       propertyPath: m_LocalScale.x
@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 3dc23307fedc74e4faec76436dd49b11, type: 2}
     - target: {fileID: 919132149155446097, guid: cdc96994e35079341bd6bef81fdfc35a, type: 3}
       propertyPath: m_Name
-      value: TrackCorner Variant
+      value: TrackCorner RightUp
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

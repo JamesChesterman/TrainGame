@@ -503,6 +503,13 @@ MonoBehaviour:
   startPoint: {fileID: 888221035}
   differencePerColumn: {x: 3.2, y: 0, z: 0}
   differencePerRow: {x: 0, y: 0, z: -3.2}
+  tracksAvailable:
+  - {fileID: 1319518833482549174, guid: 458c058fdc1010948be0d79beb375c1a, type: 3}
+  - {fileID: 5643356009485295852, guid: f7a94a974cce1f74d9541c08eb30854d, type: 3}
+  - {fileID: 6194804927494283549, guid: d61d9289ac340b54c8c3810593eba761, type: 3}
+  - {fileID: 866353892773956129, guid: 2d28e94464c731748bf8e595c222a765, type: 3}
+  - {fileID: 6488432279836505496, guid: 67c7dfd1f39adbf489cf12b1dcc82d9f, type: 3}
+  - {fileID: 8894238704931133458, guid: c645bf3b3d5852e4d9f91a44d415a9ff, type: 3}
 --- !u!1001 &687134064
 PrefabInstance:
   m_ObjectHideFlags: 0

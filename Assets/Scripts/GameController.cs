@@ -14,21 +14,25 @@ public class GameController : MonoBehaviour
     public Vector3 differencePerRow = new Vector3(0f, 0f, -3.2f);
 
     private int[,] tracks;
+    private string[,] tracksToPlace;     
     //This will be an arraylist of arraylists (routes)
     //Each subarraylist (route) will consist of arrays of length 2 (coordinates)
     private List<List<int[]>> routeList2D = new List<List<int[]>>();
+    public GameObject[] tracksAvailable;    //Array of gameobjects with the tracks in each direction
+    private GameObject[,] levelBlockArray;
 
     //Initialise the arrays used to store: where the tracks are placed, where the level blocks are placed
     private void initialiseArrays(){
-        GameObject[,] levelBlockArray = new GameObject[levelHeight, levelWidth];
+        levelBlockArray = new GameObject[levelHeight, levelWidth];
         tracks = new int[levelHeight, levelWidth];
+        tracksToPlace = new string[levelHeight, levelWidth];
 
         currentPoint = startPoint;
         for(int i=0; i<levelHeight; i++){
             for(int j=0;j<levelWidth; j++){
 
                 GameObject newBlock = Instantiate(levelBlock, currentPoint.position, currentPoint.rotation);
-                newBlock.GetComponent<LevelBlock>().setIandJ(this, i, j);
+                newBlock.GetComponent<LevelBlock>().setIandJ(this, i, j, tracksAvailable);
                 levelBlockArray[i,j] = newBlock;
 
                 tracks[i,j] = 0;
@@ -41,6 +45,74 @@ public class GameController : MonoBehaviour
         }
     }
 
+    //Get the direction of the next track in the route array
+    private string getDir(List<int[]> routeArray, int indexFrom, int indexTo){
+        if(routeArray[indexFrom][0] - 1 == routeArray[indexTo][0] && routeArray[indexFrom][1] == routeArray[indexTo][1]){
+            return "up"; 
+        }else if(routeArray[indexFrom][0] + 1 == routeArray[indexTo][0] && routeArray[indexFrom][1] == routeArray[indexTo][1]){
+            return "down";
+        }else if(routeArray[indexFrom][0] == routeArray[indexTo][0] && routeArray[indexFrom][1] + 1 == routeArray[indexTo][1]){
+            return "right";
+        }else{
+            return "left";
+        }
+        
+    }
+
+
+    //After track placed, will look through the route the track has been added to
+    //Could optimise this by getting the index in the array where the track is and only looking at the adjacant tracks as well as the new one
+    private void configureTrackDirections(int routeToConfigure){
+        List<int[]> routeArray = routeList2D[routeToConfigure];
+        for(int i=0; i<routeArray.Count;i++){
+            string prevDir = "None";
+            string nextDir = "None";
+            if(i == 0){
+                nextDir = getDir(routeArray, i, i+1);
+            }else if(i == routeArray.Count -1){
+                prevDir = getDir(routeArray, i, i-1);
+            }else{
+                nextDir = getDir(routeArray, i, i+1);
+                prevDir = getDir(routeArray, i, i-1);
+            }
+
+            int route0 = routeArray[i][0];
+            int route1 = routeArray[i][1];
+            if(prevDir == "None"){
+                if(nextDir == "left" || nextDir == "right"){
+                    tracksToPlace[route0, route1] = "Horizontal";
+                }else{
+                    tracksToPlace[route0, route1] = "Vertical";
+                }
+            }else if(nextDir == "None"){
+                if(prevDir == "left" || prevDir == "right"){
+                    tracksToPlace[route0, route1] = "Horizontal";
+                }else{
+                    tracksToPlace[route0, route1] = "Vertical";
+                }
+            }else if((prevDir == "up" && nextDir == "down") || (prevDir == "down" && nextDir == "up")){
+                tracksToPlace[route0, route1] = "Vertical";
+            }else if((prevDir == "left" && nextDir == "right") || (prevDir == "right" && nextDir == "left")){
+                tracksToPlace[route0,route1] = "Horizontal";
+            }else if((prevDir == "left" && nextDir == "down") || (prevDir == "down" && nextDir == "left")){
+                tracksToPlace[route0, route1] = "RightDown";
+            }else if((prevDir == "right" && nextDir == "down") || (prevDir == "down" && nextDir == "right")){
+                tracksToPlace[route0, route1] = "LeftDown";
+            }else if((prevDir == "left" && nextDir == "up") || (prevDir == "up" && nextDir == "left")){
+                tracksToPlace[route0, route1] = "RightUp";
+            }else if((prevDir == "right" && nextDir == "up") || (prevDir == "up" && nextDir == "right")){
+                tracksToPlace[route0, route1] = "LeftUp";
+            }else{
+                //This should never happen
+                tracksToPlace[route0,route1] = "Vertical";
+            }
+            //Debug.Log(route0);
+            //Debug.Log(route1);
+            levelBlockArray[route0, route1].GetComponent<LevelBlock>().redoTrack();
+        }
+
+    }
+
     //Merges two lists. Because the new track is at the end of list1 and at the start of list 2 you can skip over it
     private void mergeTwoLists(int routeToAddTo, int routeToRemove){
         List<int[]> routeToRemoveArray = routeList2D[routeToRemove];
@@ -48,6 +120,7 @@ public class GameController : MonoBehaviour
             routeList2D[routeToAddTo].Add(routeToRemoveArray[i]);
         }
         routeList2D.RemoveAt(routeToRemove);
+        configureTrackDirections(routeToAddTo);
     }
 
     //The new track has been placed between two separate routes. So need to join them together
@@ -64,6 +137,7 @@ public class GameController : MonoBehaviour
             //Make new route
             routeList2D.Add(new List<int[]> ());
             routeList2D[routeList2D.Count-1].Add(new int[] {newTrackX, newTrackY});
+            configureTrackDirections(route1);
         }else{
             //Case 1: IF tracks are like: tStart, tEnd, tNew, tStart, tEnd THEN it's firstPart, tNew, secondPart
             //Case 2: IF tracks are like: tEnd, tStart, tNew, tEnd, tStart THEN it's secondPart, tNew, firstPart
@@ -171,6 +245,7 @@ public class GameController : MonoBehaviour
         for(int x=0;x<routesTrackAddedTo.Count;x++){
             if(routesTrackAddedTo[x] != -1 && routeFound == -1){
                 routeFound = routesTrackAddedTo[x];
+                configureTrackDirections(x);
                 continue;
             }
             if(routesTrackAddedTo[x] != -1 && routeFound != -1){
@@ -190,9 +265,11 @@ public class GameController : MonoBehaviour
 
     public void setTrackPlaced(int i, int j){
         tracks[i,j] = 1;
+        tracksToPlace[i,j] = "Vertical";
         //Print the array
-        printArray(tracks);
+        //printArray(tracks);
         checkIfNewRoute(i,j);
+        
 
         //Print the array of routes
         string dynamicArrayAsString = string.Join(", ",
@@ -211,6 +288,10 @@ public class GameController : MonoBehaviour
             arrayToPrint += "\n";
         }
         Debug.Log(arrayToPrint);
+    }
+
+    public string[,] getTrackDirections(){
+        return tracksToPlace;
     }
 
     // Start is called before the first frame update
